@@ -105,13 +105,33 @@ const Dashboard = () => {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false, // Ensures the chart resizes properly
     plugins: {
       legend: {
-        position: 'top',
+        position: "top",
       },
       title: {
         display: true,
-        text: 'Monthly User Count by Day',
+        text: "Monthly User Count by Day",
+        font: {
+          size: 16,
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          font: {
+            size: 12,
+          },
+        },
+      },
+      y: {
+        ticks: {
+          font: {
+            size: 12,
+          },
+        },
       },
     },
   };
@@ -227,34 +247,48 @@ const Dashboard = () => {
       </div>
 
       {/* Popup Dialog */}
-      <Dialog open={open} onClose={handleClose} fullWidth>
-        <DialogTitle className="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold text-xl" style={{ borderBottom: '4px solid #4A90E2' }}>
-          {popupTitle} Details
-        </DialogTitle>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+      {/* Dialog Title */}
+      <DialogTitle
+        className="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold text-xl text-center"
+        style={{ borderBottom: "4px solid #4A90E2" }}
+      >
+        {popupTitle} Details
+      </DialogTitle>
 
-        <DialogContent>
-          <div className="space-y-4">
-            {popupData.map((item, index) => (
-              <div key={index} className="flex justify-between items-center p-4 bg-gray-100 rounded-lg shadow-sm">
-                <div className="flex items-center space-x-4">
-                  <span className="text-lg font-semibold text-gray-800">{item.id}.</span>
-                  <img
-                    src={item.image || 'https://via.placeholder.com/50'}
-                    alt={item.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <span className="text-lg font-bold text-pink-600">{item.name}</span>
-                </div>
-                <span className="text-lg text-gray-600">{item.contact}</span>
+      {/* Dialog Content */}
+      <DialogContent>
+        <div className="space-y-4">
+          {popupData.map((item, index) => (
+            <div
+              key={index}
+              className="flex flex-col sm:flex-row sm:justify-between items-center p-4 bg-gray-100 rounded-lg shadow-sm space-y-3 sm:space-y-0"
+            >
+              {/* Left Side - Image & Name */}
+              <div className="flex items-center space-x-4">
+                <span className="text-lg font-semibold text-gray-800">{item.id}.</span>
+                <img
+                  src={item.image || "https://via.placeholder.com/50"}
+                  alt={item.name}
+                  className="w-16 h-16 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-gray-300"
+                />
+                <span className="text-lg font-bold text-pink-600">{item.name}</span>
               </div>
-            ))}
-          </div>
-        </DialogContent>
 
-        <DialogActions>
-          <Button onClick={handleClose}>Close</Button>
-        </DialogActions>
-      </Dialog>
+              {/* Right Side - Contact */}
+              <span className="text-lg text-gray-600 text-center sm:text-left">{item.contact}</span>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+
+      {/* Dialog Actions */}
+      <DialogActions>
+        <Button onClick={handleClose} className="text-blue-600 font-semibold hover:bg-blue-100 px-4 py-2 rounded-lg">
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
 
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <Select
@@ -281,9 +315,12 @@ const Dashboard = () => {
         </Select>
       </div>
 
-      <div className="mt-6">
+       {/* Ensure chart resizes dynamically */}
+       <div className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
         <Bar data={dailyUserChartData} options={chartOptions} />
       </div>
+
+      
     </div>
   );
 };
