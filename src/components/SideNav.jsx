@@ -1,68 +1,98 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  FaTachometerAlt,   // Dashboard
-  FaUserShield,      // Dealer Details
-  FaUserCheck,       // Users Profile
-  FaUserPlus,        // Add Dealer
-  FaStar,            // Astrologers
-  FaServicestack     // AtoZ Services
+  FaTachometerAlt,
+  FaUserShield,
+  FaUserCheck,
+  FaUserPlus,
+  FaStar,
+  FaServicestack,
+  FaSignOutAlt,
+  FaBars,
+  FaTimes,
 } from "react-icons/fa";
 
 const SideNav = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isOpen, setIsOpen] = useState(!isMobile);
+  const navigate = useNavigate();
 
-  const handleNavigation = (page) => {
-    console.log(`Navigating to: ${page}`);
+  useEffect(() => {
+    const handleResize = () => {
+      const mobileView = window.innerWidth < 768;
+      setIsMobile(mobileView);
+      setIsOpen(!mobileView); // Auto open on desktop, close on mobile
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    if (isMobile) setIsOpen(!isOpen);
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    if (isMobile) setIsOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    navigate("/AuthPage");
+    if (isMobile) setIsOpen(false);
   };
 
   return (
-    <div className="sidenav">
-      <ul className="sidenav-list">
-        {/* Dashboard */}
-        <li>
-          <Link to="/" className="sidenav-link" onClick={() => handleNavigation("Dashboard")}>
-            <FaTachometerAlt className="sidenav-icon" /> Dashboard
-          </Link>
-        </li>
+    <>
+      {/* Mobile Menu Button */}
+      {isMobile && (
+        <button className="menu-toggle" onClick={toggleSidebar}>
+          {isOpen ? <FaTimes /> : <FaBars />}
+        </button>
+      )}
 
-        {/* Dealer Details */}
-        <li>
-          <Link to="/DealerVerify" className="sidenav-link" onClick={() => handleNavigation("Dealer Details")}>
-            <FaUserShield className="sidenav-icon" /> Dealer Details
-          </Link>
-        </li>
-
-        {/* Users Profile */}
-        <li>
-          <Link to="/verifiedProfile" className="sidenav-link" onClick={() => handleNavigation("Users Profile")}>
-            <FaUserCheck className="sidenav-icon" /> Users Profile
-          </Link>
-        </li>
-
-        {/* Add Dealer */}
-        <li>
-          <Link to="/brokerlist" className="sidenav-link" onClick={() => handleNavigation("Add Dealer")}>
-            <FaUserPlus className="sidenav-icon" /> Add Dealer
-          </Link>
-        </li>
-
-        {/* Astrologers */}
-        <li>
-          <Link to="/Astrologers" className="sidenav-link" onClick={() => handleNavigation("Astrologers")}>
-            <FaStar className="sidenav-icon" /> Astrologers
-          </Link>
-        </li>
-
-        {/* AtoZ Services */}
-        <li>
-          <Link to="/AtoZservices" className="sidenav-link" onClick={() => handleNavigation("AtoZ Services")}>
-            <FaServicestack className="sidenav-icon" /> AtoZ Services
-          </Link>
-        </li>
-
-      </ul>
-    </div>
+      {/* Sidebar */}
+      <div className={`sidenav ${isOpen ? "open" : "closed"}`}>
+        <ul className="sidenav-list">
+          <li>
+            <Link to="/" className="sidenav-link mt-10" onClick={() => handleNavigation("/")}>
+              <FaTachometerAlt className="sidenav-icon" /> Dashboard
+            </Link>
+          </li>
+          <li>
+            <Link to="/DealerVerify" className="sidenav-link" onClick={() => handleNavigation("/DealerVerify")}>
+              <FaUserShield className="sidenav-icon" /> Dealer Details
+            </Link>
+          </li>
+          <li>
+            <Link to="/verifiedProfile" className="sidenav-link" onClick={() => handleNavigation("/verifiedProfile")}>
+              <FaUserCheck className="sidenav-icon" /> Users Profile
+            </Link>
+          </li>
+          <li>
+            <Link to="/brokerlist" className="sidenav-link" onClick={() => handleNavigation("/brokerlist")}>
+              <FaUserPlus className="sidenav-icon" /> Add Dealer
+            </Link>
+          </li>
+          <li>
+            <Link to="/Astrologers" className="sidenav-link" onClick={() => handleNavigation("/Astrologers")}>
+              <FaStar className="sidenav-icon" /> Astrologers
+            </Link>
+          </li>
+          <li>
+            <Link to="/AtoZservices" className="sidenav-link" onClick={() => handleNavigation("/AtoZservices")}>
+              <FaServicestack className="sidenav-icon" /> AtoZ Services
+            </Link>
+          </li>
+          <li>
+            <button className="sidenav-link logout-btn" onClick={handleLogout}>
+              <FaSignOutAlt className="sidenav-icon" /> Logout
+            </button>
+          </li>
+        </ul>
+      </div>
+    </>
   );
 };
 
-export default SideNav;
+export default SideNav; 

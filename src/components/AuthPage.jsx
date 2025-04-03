@@ -19,7 +19,6 @@ const AuthPage = () => {
     const payload = {
       ...data,
       action: isSignUp ? "signup" : "login",
-      ...(isSignUp && { token: "your-auth-token" }), // Ensure token is sent during signup
     };
 
     try {
@@ -31,7 +30,12 @@ const AuthPage = () => {
       alert(response.message);
 
       if (response.status === "success") {
-        isSignUp ? setIsSignUp(false) : navigate("/dashboard");
+        if (isSignUp) {
+          setIsSignUp(false); // Switch to login after successful signup
+        } else {
+          localStorage.setItem("authToken", response.token); // Save token
+          navigate("/dashboard"); // Redirect to dashboard
+        }
       }
     } catch (error) {
       console.error("Error:", error);
@@ -42,28 +46,9 @@ const AuthPage = () => {
   };
 
   const formFields = [
-    ...(isSignUp
-      ? [
-          {
-            label: "Name",
-            type: "text",
-            name: "name",
-            placeholder: "Your name",
-          },
-        ]
-      : []),
-    {
-      label: "Email",
-      type: "email",
-      name: "email",
-      placeholder: "you@example.com",
-    },
-    {
-      label: "Password",
-      type: "password",
-      name: "password",
-      placeholder: "Enter your password",
-    },
+    ...(isSignUp ? [{ label: "Name", type: "text", name: "name", placeholder: "Your name" }] : []),
+    { label: "Email", type: "email", name: "email", placeholder: "you@example.com" },
+    { label: "Password", type: "password", name: "password", placeholder: "Enter your password" },
   ];
 
   return (
@@ -76,9 +61,7 @@ const AuthPage = () => {
         <form className="space-y-4" onSubmit={handleSubmit}>
           {formFields.map((field) => (
             <div key={field.name}>
-              <label className="block text-sm font-medium text-gray-700">
-                {field.label}
-              </label>
+              <label className="block text-sm font-medium text-gray-700">{field.label}</label>
               <input
                 type={field.type}
                 name={field.name}
@@ -100,10 +83,7 @@ const AuthPage = () => {
 
         <p className="text-sm text-center text-gray-600">
           {isSignUp ? "Already have an account?" : "Don't have an account?"}
-          <button
-            onClick={toggleForm}
-            className="ml-1 text-blue-500 hover:underline"
-          >
+          <button onClick={toggleForm} className="ml-1 text-blue-500 hover:underline">
             {isSignUp ? "Login" : "Sign Up"}
           </button>
         </p>
