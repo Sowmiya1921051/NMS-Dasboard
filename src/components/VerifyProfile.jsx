@@ -375,47 +375,56 @@ const UserTable = () => {
             ) : (
                 <div>
                     {/* Filter and Report Buttons */}
-                    <div className="flex flex-wrap items-center gap-4 p-4">
-                        {[
-                            { label: 'All Users', value: 'all' },
-                            { label: 'Verified Users', value: 'verified' },
-                            { label: 'Unverified Users', value: 'unverified' },
-                            { label: 'Credit Points', value: 'creditPoints' },
-                        ].map(({ label, value }) => (
-                            <button
-                                key={value}
-                                className={`px-4 py-2 rounded-lg transition-transform duration-300 ${filter === value
+                    <div className="p-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-4">
+                        {/* Filter Buttons - Grid for Mobile, Flex for Larger Screens */}
+                        <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-4 sm:w-auto">
+                            {[
+                                { label: 'All Users', value: 'all' },
+                                { label: 'Verified Users', value: 'verified' },
+                                { label: 'Unverified Users', value: 'unverified' },
+                                { label: 'Credit Points', value: 'creditPoints' },
+                            ].map(({ label, value }) => (
+                                <button
+                                    key={value}
+                                    className={`px-4 py-2 rounded-lg text-sm transition-all duration-300 ${filter === value
                                         ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white scale-105'
                                         : 'bg-gray-200 text-gray-800 hover:bg-blue-400 hover:text-white'
-                                    }`}
-                                onClick={() => {
-                                    setFilter(value);
-                                    if (value === 'creditPoints') {
-                                        handleCreditClick();
-                                    } else {
-                                        setCredit(false);
-                                    }
-                                }}
-                            >
-                                {label}
-                            </button>
-                        ))}
+                                        }`}
+                                    onClick={() => {
+                                        setFilter(value);
+                                        if (value === 'creditPoints') {
+                                            handleCreditClick();
+                                        } else {
+                                            setCredit(false);
+                                        }
+                                    }}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
 
-                        <Link to="/reports" className="flex items-center">
-                            <button className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg transition-transform duration-300 hover:scale-105 hover:from-red-500 hover:to-red-700">
-                                Report
-                            </button>
-                        </Link>
+                        {/* Report Button - Full Width on Mobile, Auto on Larger Screens */}
+                        <div className="w-full sm:w-auto flex justify-center">
+                            <Link to="/reports">
+                                <button className="w-full sm:w-auto px-4 py-2 text-sm bg-gradient-to-r from-red-600 to-red-800 text-white rounded-lg transition-all duration-300 hover:scale-105 hover:from-red-500 hover:to-red-700">
+                                    Report
+                                </button>
+                            </Link>
+                        </div>
 
-                        {/* Search Bar */}
-                        <input
-                            type="text"
-                            placeholder="Search by ID, name, or email..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
-                        />
+                        {/* Search Bar - Full Width on Mobile, Scales on Larger Screens */}
+                        <div className="w-full sm:w-auto flex-grow">
+                            <input
+                                type="text"
+                                placeholder="Search by ID, name, or email..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+                            />
+                        </div>
                     </div>
+
 
 
 
@@ -457,9 +466,9 @@ const UserTable = () => {
                     )}
 
                     {filter === 'creditPoints' && credit && (
-                       
+
                         <div className="container mx-auto p-4">
-                        <h2 className="text-3xl font-extrabold text-green-600 tracking-wide uppercase mt-2 mb-6 text-center">Credit Points</h2>
+                            <h2 className="text-3xl font-extrabold text-green-600 tracking-wide uppercase mt-2 mb-6 text-center">Credit Points</h2>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
                                 {creditData && creditData.length > 0 ? (
                                     creditData.map((item) => (
@@ -522,7 +531,7 @@ const UserTable = () => {
 
                     {filter === 'verified' && !credit && (
                         <>
-                        <h2 className="text-3xl font-extrabold text-blue-600 tracking-wide uppercase mt-6 text-center">Verified Profiles</h2>
+                            <h2 className="text-3xl font-extrabold text-blue-600 tracking-wide uppercase mt-6 text-center">Verified Profiles</h2>
                             <div className="user-cards">
                                 {verifiedUsers
                                     .filter((user) => {
@@ -541,7 +550,7 @@ const UserTable = () => {
 
                     {filter === 'unverified' && !credit && (
                         <>
-                        <h2 className="text-3xl font-extrabold text-red-600 tracking-wide uppercase text-center mt-6">Unverified Profiles </h2>
+                            <h2 className="text-3xl font-extrabold text-red-600 tracking-wide uppercase text-center mt-6">Unverified Profiles </h2>
                             <div className="user-cards">
                                 {notVerifiedUsers
                                     .filter((user) => {
