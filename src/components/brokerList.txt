@@ -1,0 +1,333 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+
+const BrokerForm = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email_or_phone: '',
+    password: '',
+    parentID: '',
+    company: '',
+    dealer_type: '',
+    district: '',
+    address: '',
+    phone: '',
+    photo: null,
+  });
+
+  const [message, setMessage] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false); // To track if the form is submitted
+  const [otp, setOtp] = useState(''); // To store OTP
+  const [isOtpVerified, setIsOtpVerified] = useState(false); // To track OTP verification status
+  const [email, setEmail] = useState(''); // To store the email for OTP validation
+  const [currentStep, setCurrentStep] = useState(1); // To track which section to display
+
+  // Handle form field changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  // Handle photo upload
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, photo: e.target.files[0] });
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const formPayload = new FormData();
+    for (const key in formData) {
+      formPayload.append(key, formData[key]);
+    }
+
+    try {
+      // Submit the form to backend API to register the broker
+      const response = await axios.post(
+        'https://bank.infiscripts.com/broker-dealers.php',
+        formPayload,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      setMessage(response.data.message || 'Form submitted successfully! Please check your email for OTP.');
+      setIsSubmitted(true); // Form has been submitted, show OTP input
+      setEmail(formData.email_or_phone); // Store the email for OTP verification
+    } catch (error) {
+      setMessage('Error occurred while submitting the form.');
+    }
+  };
+
+  // Handle OTP input change
+  const handleOtpChange = (e) => {
+    setOtp(e.target.value);
+  };
+
+  // Handle OTP verification
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Send OTP verification request to the API
+      const response = await axios.post(
+        'https://bank.infiscripts.com/subdealer-otp.php',
+        {
+          email_or_phone: email, // Email for validation
+          otp: otp, // OTP entered by the user
+        }
+      );
+
+      // Check the response for OTP verification status
+      if (response.data.status === 'success') {
+        setIsOtpVerified(true);
+        setMessage('OTP Verified! Registration completed successfully.');
+        
+        // Reset to Step 1 and clear form data
+        resetForm();
+      } else {
+        setMessage('Invalid OTP. Please try again.');
+      }
+    } catch (error) {
+      setMessage('Error occurred while verifying OTP.');
+    }
+  };
+
+  const goToNextStep = () => {
+    setCurrentStep(currentStep + 1);
+  };
+
+  const goToPreviousStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      email_or_phone: '',
+      password: '',
+      parentID: '',
+      company: '',
+      dealer_type: '',
+      district: '',
+      address: '',
+      phone: '',
+      photo: null,
+    });
+    setOtp('');
+    setIsOtpVerified(false);
+    setMessage('');
+    setIsSubmitted(false); // Reset submission flag
+    setCurrentStep(1); // Reset to Step 1
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto  mt-10">
+      <h2 className="text-3xl font-semibold text-center mb-8 text-indigo-600">Broker Registration</h2>
+
+      {!isSubmitted ? (
+        // Sections based on currentStep
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {currentStep === 1 && (
+            // First section (Personal Details)
+            <div className="p-6 bg-gray-100 rounded-lg shadow-lg">
+              <h3 className="text-xl font-medium text-gray-700 mb-4">Step 1: Personal Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-gray-700 font-medium">Name:</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium">Email or Phone:</label>
+                  <input
+                    type="text"
+                    name="email_or_phone"
+                    value={formData.email_or_phone}
+                    onChange={handleChange}
+                    className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium">Password:</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+              <div className="mt-6 flex justify-between">
+                <button
+                  type="button"
+                  onClick={goToNextStep}
+                  className="bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 2 && (
+            // Second section (Business Details)
+            <div className="p-6 bg-gray-50 rounded-lg shadow-lg">
+              <h3 className="text-xl font-medium text-gray-700 mb-4">Step 2: Business Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-gray-700 font-medium">Parent ID:</label>
+                  <input
+                    type="text"
+                    name="parentID"
+                    value={formData.parentID}
+                    onChange={handleChange}
+                    className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium">Company:</label>
+                  <input
+                    type="text"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium">Dealer Type:</label>
+                  <input
+                    type="text"
+                    name="dealer_type"
+                    value={formData.dealer_type}
+                    onChange={handleChange}
+                    className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+              <div className="mt-6 flex justify-between">
+                <button
+                  type="button"
+                  onClick={goToPreviousStep}
+                  className="bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={goToNextStep}
+                  className="bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 3 && (
+            // Third section (Contact Details)
+            <div className="p-6 bg-gray-50 rounded-lg shadow-lg">
+              <h3 className="text-xl font-medium text-gray-700 mb-4">Step 3: Contact Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-gray-700 font-medium">District:</label>
+                  <input
+                    type="text"
+                    name="district"
+                    value={formData.district}
+                    onChange={handleChange}
+                    className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium">Address:</label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium">Phone:</label>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium">Upload Photo:</label>
+                  <input
+                    type="file"
+                    name="photo"
+                    onChange={handleFileChange}
+                    className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+              <div className="mt-6 flex justify-between">
+                <button
+                  type="button"
+                  onClick={goToPreviousStep}
+                  className="bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                >
+                  Previous
+                </button>
+                <button
+                  type="submit"
+                  className="bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          )}
+        </form>
+      ) : (
+        // OTP section after form submission
+        <div className="mt-8">
+          <h3 className="text-xl font-medium text-gray-700 mb-4">OTP Verification</h3>
+          <form onSubmit={handleOtpSubmit} className="space-y-6">
+            <div>
+              <label className="block text-gray-700 font-medium">Enter OTP:</label>
+              <input
+                type="text"
+                value={otp}
+                onChange={handleOtpChange}
+                className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <button
+                type="submit"
+                className="bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+              >
+                Verify OTP
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {message && (
+        <div className="mt-4 text-center text-lg text-indigo-600">{message}</div>
+      )}
+    </div>
+  );
+};
+
+export default BrokerForm;
