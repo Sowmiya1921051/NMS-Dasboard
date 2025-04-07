@@ -40,7 +40,7 @@ import "./App.css"; // Import CSS for responsiveness
 
 function App() {
   return (
-    <BrowserRouter basename="/frontend/">
+    <BrowserRouter basename="/">
       <MainLayout />
     </BrowserRouter>
   );
@@ -61,7 +61,7 @@ function MainLayout() {
       ) : (
         <>
           {!hideSideNav && <SideNav />} {/* Show SideNav only if not on AuthPage */}
-          <div className={`main-content ${hideSideNav ? "full-width" : ""}`}>
+          <div className={`main-content ${hideSideNav ? "full-width" : ""} `}>
             <Routes>
               <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/AuthPage"} />} />
               <Route path="/AuthPage" element={<AuthPage />} />
@@ -106,4 +106,4 @@ function MainLayout() {
   );
 }
 
-export default App; 
+export default App;
